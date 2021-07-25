@@ -7,7 +7,7 @@ import json
 from discord.ext import commands
 
 from util.get_embed_color import get_embed_color
-from data.prefix import PREFIX
+from util.get_server_prefix import get_server_prefix
 
 
 class Display(commands.Cog):
@@ -33,7 +33,7 @@ class Display(commands.Cog):
             description=description.rstrip(),
             color = get_embed_color(ctx.message.author.id)
         ).set_author(name=f'{ctx.message.author.name}\'s todo-list', icon_url=ctx.message.author.avatar_url)
-        embed.set_footer(text=f'Add a task with `{PREFIX} add <task>`')
+        embed.set_footer(text=f'Add a task with `{await get_server_prefix(self.bot, ctx)}add <task>`')
         await ctx.message.channel.send(embed=embed)
 
     @display.error

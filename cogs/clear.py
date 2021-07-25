@@ -6,7 +6,6 @@ import discord
 import json
 from discord.ext import commands
 
-from util.get_embed_color import get_embed_color
 from util.send_embed import send_embed
 
 

@@ -8,7 +8,7 @@ import os
 from discord.ext import commands
 
 from util.get_embed_color import get_embed_color
-from data.prefix import PREFIX
+from util.get_server_prefix import get_server_prefix
 
 
 class Help(commands.Cog):
@@ -24,7 +24,7 @@ class Help(commands.Cog):
     async def help(self, ctx, *, content=None):
         embed = discord.Embed(
             title='**Todo-bot Command List**',
-            description=f'**Prefix: {PREFIX}**',
+            description=f'**Prefix: {await get_server_prefix(self.bot, ctx)}**',
             color=get_embed_color(ctx.message.author.id)
         )
         for cmd in self.commands:

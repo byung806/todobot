@@ -6,9 +6,8 @@ import discord
 import json
 from discord.ext import commands
 
-from util.get_embed_color import get_embed_color
+from util.get_server_prefix import get_server_prefix
 from util.send_embed import send_embed
-from data.prefix import PREFIX
 
 
 class Add(commands.Cog):
@@ -41,7 +40,8 @@ class Add(commands.Cog):
     async def add_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
             await send_embed(ctx, 'Provide a task name', 'You need *something* to put on your todo-list.\n'
-                                                         f'Use `{PREFIX} add <task>` to add a task.')
+                                                         f'Use `{await get_server_prefix(self.bot, ctx)}'
+                                                         f'add <task>` to add a task.')
         else:
             raise error
 

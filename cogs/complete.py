@@ -6,8 +6,8 @@ import discord
 import json
 from discord.ext import commands
 
+from util.get_server_prefix import get_server_prefix
 from util.send_embed import send_embed
-from data.prefix import PREFIX
 
 
 class Complete(commands.Cog):
@@ -61,7 +61,8 @@ class Complete(commands.Cog):
     async def complete_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
             await send_embed(ctx, 'Provide a task name', 'You need *something* to mark as complete in your todo-list.\n'
-                                                         f'Use `{PREFIX} complete <task>` to mark a task as complete.')
+                                                         f'Use `{await get_server_prefix(self.bot, ctx)}'
+                                                         f'complete <task>` to mark a task as complete.')
         else:
             raise error
 

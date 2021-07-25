@@ -6,8 +6,8 @@ import discord
 import json
 from discord.ext import commands
 
+from util.get_server_prefix import get_server_prefix
 from util.send_embed import send_embed
-from data.prefix import PREFIX
 
 
 class Delete(commands.Cog):
@@ -61,7 +61,8 @@ class Delete(commands.Cog):
     async def delete_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
             await send_embed(ctx, 'Provide a task name', 'You need *something* to delete from your todo-list.\n'
-                                                         f'Use `{PREFIX} delete <task>` to delete a task.')
+                                                         f'Use `{await get_server_prefix(self.bot, ctx)}'
+                                                         f'delete <task>` to delete a task.')
         else:
             raise error
 

@@ -2,13 +2,15 @@
 Set a reminder for the future (ex: todo rm 1d4h do the dishes)
 '''
 import asyncio
+import json
+import time
 
 import discord
 from discord.ext import commands
+from discord.ext import tasks
 
-from util.get_embed_color import get_embed_color
+from util.get_server_prefix import get_server_prefix
 from util.send_embed import send_embed
-from data.prefix import PREFIX
 
 
 class Reminder(commands.Cog):
@@ -39,7 +41,7 @@ class Reminder(commands.Cog):
         return seconds
 
     @commands.command(aliases=['remind', 'rm', 'notify', 'notifyme', 'timer', 'remindme'])
-    async def reminder(self, ctx, time: str, *, reminder: str=None):
+    async def reminder(self, ctx, time: str, *, reminder: str):
         if not reminder:
             reminder = ''
         time = time.lower()[::-1]
@@ -87,7 +89,7 @@ class Reminder(commands.Cog):
     async def reminder_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
             await send_embed(ctx, 'Provide a reminder', 'You need *something* for me to remind you about.\n'
-                                                         f'Use `{PREFIX} remind <time> <reminder>` so I know what to remind you about.')
+                                                         f'Use `{await get_server_prefix(self.bot, ctx)}remind <time> <reminder>` so I know what to remind you about.')
         else:
             raise error
 
