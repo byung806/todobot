@@ -18,7 +18,7 @@ def mixed_case(*args):
         for x in list(a): total.append(x)
     return list(total)
 
-TOKEN = "ODY3NTIwNDYyNzg3MDUxNTUy.YPiTZA.4jvfp4c8k60VsajvD05JLiAzvqE"
+TOKEN = "interesting token you got there"
 bot = commands.Bot(command_prefix=get_server_prefix, case_insensitive=True)
 bot.remove_command('help')
 
