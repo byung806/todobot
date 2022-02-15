@@ -3,7 +3,7 @@ import os
 import discord
 from discord.ext import commands
 
-from data.config import PREFIX
+from data.config import PREFIX, TOKEN
 from util.get_server_prefix import get_server_prefix
 from util.send_embed import send_embed
 
@@ -16,8 +16,6 @@ def mixed_case(*args):
         for x in list(a): total.append(x)
     return list(total)
 
-
-TOKEN = "ODY3NTIwNDYyNzg3MDUxNTUy.YPiTZA.jy0Hg1FFsAvfBL-fLJ5lvs986MQ"
 bot = commands.Bot(command_prefix=get_server_prefix, case_insensitive=True)
 bot.remove_command('help')
 

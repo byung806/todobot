@@ -1,2 +1,0 @@
-# default prefix
-PREFIX = 'todo '
