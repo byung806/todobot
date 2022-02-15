@@ -1,1 +1,34 @@
-{"461345173314732052": {"finish reviewing math hw": false, "finish code for tmrw": false}, "505494537515433997": {"r": true}}
+{
+  "461345173314732052": {
+    "most important thing lmao": [
+      false,
+      10
+    ],
+    "less important thing lol": [
+      false,
+      9
+    ],
+    "ababa": [
+      true,
+      5
+    ],
+    "high p": [
+      false,
+      10
+    ],
+    "superhigh p": [
+      false,
+      11
+    ],
+    "supersuperhigh p": [
+      false,
+      19
+    ]
+  },
+  "505494537515433997": {
+    "r": [
+      true,
+      5
+    ]
+  }
+}

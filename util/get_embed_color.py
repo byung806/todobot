@@ -1,5 +1,6 @@
 import json
 
+
 def get_embed_color(user_id, hex_code=None):
     data = json.load(open('data\\colors.json', 'r'))
     if str(user_id) in data:

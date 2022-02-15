@@ -1,5 +1,7 @@
 import json
-from data.default_prefix import PREFIX
+
+from data.config import PREFIX
+
 
 async def get_server_prefix(bot, message) -> str:
     data = json.load(open('data\\prefixes.json', 'r'))
