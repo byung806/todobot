@@ -4,8 +4,8 @@ import re
 import discord
 from discord.ext import commands
 
+from util.generate_embed import generate_embed
 from util.get_server_prefix import get_server_prefix
-from util.send_embed import send_embed
 
 
 class Prefix(commands.Cog):
@@ -20,7 +20,8 @@ class Prefix(commands.Cog):
         '''
         old_prefix = await get_server_prefix(self.bot, ctx)
         if not new_prefix:
-            await send_embed(ctx, 'Server prefix', f'**{ctx.guild.name}**\'s current prefix is `{old_prefix}`.')
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Server prefix',
+                                                      f'**{ctx.guild.name}**\'s current prefix is `{old_prefix}`.'))
             return
         found = re.findall(r'".+"', new_prefix)
         if found:
@@ -36,13 +37,15 @@ class Prefix(commands.Cog):
         f = open('data\\prefixes.json', 'w')
         f.write(json_data)
         f.close()
-        await send_embed(ctx, 'Server prefix set', f'Prefix set to: `{new_prefix}`\nOld prefix: `{old_prefix}`',
-                         color=discord.Color.green())
+        await ctx.send(embed=await generate_embed(ctx.message.author, 'Server prefix set',
+                                                  f'Prefix set to: `{new_prefix}`\nOld prefix: `{old_prefix}`',
+                                                  color=discord.Color.green()))
 
     @prefix.error
     async def prefix_error(self, ctx, error):
-        await send_embed(ctx, 'Could not set prefix', 'Surround your new prefix in double quotes.'
-                                                      f' (ex: {await get_server_prefix(self.bot, ctx)}prefix "todo "')
+        await ctx.send(embed=await generate_embed(ctx.message.author, 'Could not set prefix',
+                                                  'Surround your new prefix in double quotes.'
+                                                  f' (ex: {await get_server_prefix(self.bot, ctx)}prefix "todo "'))
 
 
 def setup(bot):

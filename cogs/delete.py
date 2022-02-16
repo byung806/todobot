@@ -7,8 +7,8 @@ import json
 import discord
 from discord.ext import commands
 
+from util.generate_embed import generate_embed
 from util.get_server_prefix import get_server_prefix
-from util.send_embed import send_embed
 
 
 class Delete(commands.Cog):
@@ -30,14 +30,14 @@ class Delete(commands.Cog):
 
                 if len(found) >= 2:  # found 2 or more matching tasks to delete
                     if task not in found:
-                        await send_embed(ctx, 'Multiple tasks found',
-                                         f'Which task would you like to remove? ({", ".join(found)})')
+                        await ctx.send(embed=await generate_embed(ctx.message.author, 'Multiple tasks found',
+                                                                  f'Which task would you like to remove? ({", ".join(found)})'))
                         choice = (
                             await self.bot.wait_for('message', check=lambda msg: msg.author == ctx.author)).content
                         while choice not in found:
-                            await send_embed(ctx,
-                                             'Choose a task from the list',
-                                             f'Which task would you like to remove? ({", ".join(found)})\n(Case sensitive)')
+                            await ctx.send(embed=await generate_embed(ctx.message.author,
+                                                                      'Choose a task from the list',
+                                                                      f'Which task would you like to remove? ({", ".join(found)})\n(Case sensitive)'))
                             choice = (
                                 await self.bot.wait_for('message', check=lambda msg: msg.author == ctx.author)).content
                         data[str(ctx.message.author.id)].pop(choice)  # valid choice inside found
@@ -51,24 +51,27 @@ class Delete(commands.Cog):
                     popped = found[0]
 
                 else:  # no matches are found
-                    await send_embed(ctx, 'Couldn\'t find any tasks with that name',
-                                     'No matches were found. Use the `list` command to check your todo-list.',
-                                     color=discord.Color.red())
+                    await ctx.send(
+                        embed=await generate_embed(ctx.message.author, 'Couldn\'t find any tasks with that name',
+                                                   'No matches were found. Use the `list` command to check your todo-list.',
+                                                   color=discord.Color.red()))
                     return
         else:  # no todo-list found
-            await send_embed(ctx, 'Empty todo-list', 'Your todo-list is empty. Add a task using the `add` command.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Empty todo-list',
+                                                      'Your todo-list is empty. Add a task using the `add` command.',
+                                                      color=discord.Color.red()))
             return
 
         if popped != 'all':
-            await send_embed(ctx, 'Task deleted', f'Removed **{popped}**.', color=discord.Color.green())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Task deleted', f'Removed **{popped}**.',
+                                                      color=discord.Color.green()))
             json_data = json.dumps(data)
             f = open('data\\tasks.json', 'w')
             f.write(json_data)
             f.close()
         else:
-            await send_embed(ctx, 'Confirmation',
-                             'Are you sure you want to clear your todo-list? This is **irreversible**.')
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Confirmation',
+                                                      'Are you sure you want to clear your todo-list? This is **irreversible**.'))
             if (await self.bot.wait_for('message', check=lambda msg: msg.author == ctx.author)).content.lower() in [
                 'yes', 'y', 'yup', 'sure', 'ok', 'okay', 'yeah', 'ofc', 'of course']:
                 data[str(ctx.message.author.id)] = {}
@@ -76,18 +79,21 @@ class Delete(commands.Cog):
                 f = open('data\\tasks.json', 'w')
                 f.write(json_data)
                 f.close()
-                await send_embed(ctx, 'Todo-list cleared', 'Deleted all tasks on your todo-list!',
-                                 color=discord.Color.green())
+                await ctx.send(embed=await generate_embed(ctx.message.author, 'Todo-list cleared',
+                                                          'Deleted all tasks on your todo-list!',
+                                                          color=discord.Color.green()))
             else:
-                await send_embed(ctx, 'Not cleared', 'Okay, didn\'t delete all tasks on your todo-list.')
+                await ctx.send(embed=await generate_embed(ctx.message.author, 'Not cleared',
+                                                          'Okay, didn\'t delete all tasks on your todo-list.'))
 
     @delete.error
     async def delete_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
-            await send_embed(ctx, 'Provide a task name', 'You need *something* to delete from your todo-list.\n'
-                                                         f'Use `{await get_server_prefix(self.bot, ctx)}'
-                                                         f'delete <task>` to delete a task.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Provide a task name',
+                                                      'You need *something* to delete from your todo-list.\n'
+                                                      f'Use `{await get_server_prefix(self.bot, ctx)}'
+                                                      f'delete <task>` to delete a task.',
+                                                      color=discord.Color.red()))
         else:
             raise error
 

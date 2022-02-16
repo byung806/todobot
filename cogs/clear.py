@@ -7,7 +7,7 @@ import json
 import discord
 from discord.ext import commands
 
-from util.send_embed import send_embed
+from util.generate_embed import generate_embed
 
 
 class Clear(commands.Cog):
@@ -18,8 +18,8 @@ class Clear(commands.Cog):
     async def clear(self, ctx, *, content=None):
         data = json.load(open('data\\tasks.json', 'r'))
         if str(ctx.message.author.id) in data:
-            await send_embed(ctx, 'Confirmation',
-                             'Are you sure you want to clear your todo-list? This is **irreversible**.')
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Confirmation',
+                                                      'Are you sure you want to clear your todo-list? This is **irreversible**.'))
             if (await self.bot.wait_for('message', check=lambda msg: msg.author == ctx.author)).content.lower() in [
                 'yes', 'y', 'yup', 'sure', 'ok', 'okay', 'yeah', 'ofc', 'of course']:
                 data[str(ctx.message.author.id)] = {}
@@ -27,12 +27,17 @@ class Clear(commands.Cog):
                 f = open('data\\tasks.json', 'w')
                 f.write(json_data)
                 f.close()
-                await send_embed(ctx, 'Todo-list cleared', 'Cleared your todo-list!', color=discord.Color.green())
+                await ctx.send(
+                    embed=await generate_embed(ctx.message.author, 'Todo-list cleared', 'Cleared your todo-list!',
+                                               color=discord.Color.green()))
             else:
-                await send_embed(ctx, 'Not cleared', 'Okay, didn\'t clear your todo-list.', color=discord.Color.red())
+                await ctx.send(
+                    embed=await generate_embed(ctx.message.author, 'Not cleared', 'Okay, didn\'t clear your todo-list.',
+                                               color=discord.Color.red()))
         else:
-            await send_embed(ctx, 'No todo-list', 'You don\'t have a todo-list! Create one with the `add` command.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'No todo-list',
+                                                      'You don\'t have a todo-list! Create one with the `add` command.',
+                                                      color=discord.Color.red()))
 
 
 def setup(bot):

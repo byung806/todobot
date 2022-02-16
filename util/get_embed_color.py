@@ -1,17 +1,23 @@
 import json
+import random
+
+from data.config import DEFAULT_COLOR
 
 
 def get_embed_color(user_id, hex_code=None):
     data = json.load(open('data\\colors.json', 'r'))
     if str(user_id) in data:
-        if not hex_code:
-            sixteenIntegerHex = int(data[str(user_id)].replace("#", ""), 16)
-            readableHex = int(hex(sixteenIntegerHex), 0)
-            return readableHex
+        color = data[str(user_id)]
+        if color == 'random':
+            if hex_code:
+                return '#RANDOM'
+            color = random.randint(0, 0xFFFFFF)
+        if hex_code:
+            return '#' + hex(color)[2:].upper()
         else:
-            return data[str(user_id)]
+            return color
     else:
-        if not hex_code:
-            return 0  # black color
+        if hex_code:
+            return '#' + hex(DEFAULT_COLOR).upper()[2:]
         else:
-            return '#000000'
+            return DEFAULT_COLOR

@@ -6,8 +6,8 @@ from datetime import datetime
 import discord
 from discord.ext import commands, tasks
 
+from util.generate_embed import generate_embed
 from util.get_server_prefix import get_server_prefix
-from util.send_embed import send_embed
 
 
 class Reminder(commands.Cog):
@@ -65,45 +65,32 @@ class Reminder(commands.Cog):
         '''
         if not reminder:
             reminder = ''
-        seconds = int(await self.parse_time(t))
-        if seconds == -1:
+        total_seconds = int(await self.parse_time(t))
+        if total_seconds == -1:
             raise Exception
-        temp = seconds
-        days = int(temp / (3600 * 24))
-        temp -= days * 3600 * 24
-        hours = int(temp / 3600)
-        temp -= hours * 3600
-        minutes = int(temp / 60)
-        temp -= minutes * 60
-        secs = temp
-        time_list = []
-        if days != 0:
-            if days == 1:
-                time_list.append(f'{days} day')
-            else:
-                time_list.append(f'{days} days')
-        if hours != 0:
-            if hours == 1:
-                time_list.append(f'{hours} hour')
-            else:
-                time_list.append(f'{hours} hours')
-        if minutes != 0:
-            if minutes == 1:
-                time_list.append(f'{minutes} minute')
-            else:
-                time_list.append(f'{minutes} minutes')
-        if secs != 0:
-            if secs == 1:
-                time_list.append(f'{secs} second')
-            else:
-                time_list.append(f'{secs} seconds')
-        time_string = ' '.join(time_list)
-        msg = await send_embed(ctx, 'Set a reminder',
-                               f'<@!{ctx.author.id}>, I\'ll remind you about **{reminder}** in **{time_string}**.',
-                               color=discord.Color.green())
+        temp = total_seconds
+        months = temp // (3600 * 24 * 31);
+        temp %= 3600 * 24 * 31
+        days = temp // (3600 * 24);
+        temp %= 3600 * 24
+        hours = temp // 3600;
+        temp %= 3600
+        minutes = temp // 60;
+        temp %= 60
+        seconds = temp
+        time_string = ''
+        time_string += ((f'{months} month' + ('s ' if months > 1 else ' ')) if months != 0 else ' ')
+        time_string += ((f'{days} day' + ('s ' if days > 1 else ' ')) if days != 0 else ' ')
+        time_string += ((f'{hours} hour' + ('s ' if hours > 1 else ' ')) if hours != 0 else ' ')
+        time_string += ((f'{minutes} minute' + ('s ' if minutes > 1 else ' ')) if minutes != 0 else ' ')
+        time_string += ((f'{seconds} second' + ('s ' if seconds > 1 else ' ')) if seconds != 0 else ' ')
+        time_string = time_string.strip()
+        msg = await ctx.send(embed=await generate_embed(ctx.message.author, 'Set a reminder',
+                                                        f'<@!{ctx.author.id}>, I\'ll remind you about **{reminder}** in **{time_string}**.',
+                                                        color=discord.Color.green()))
         data = json.load(open('data\\reminders.json', 'r'))
-        seconds += time.time()
-        data[seconds] = [ctx.author.id, ctx.channel.id, reminder, time_string, msg.id]
+        total_seconds += time.time()
+        data[total_seconds] = [ctx.author.id, ctx.channel.id, reminder, time_string, msg.id]
         json_data = json.dumps(data)
         f = open('data\\reminders.json', 'w')
         f.write(json_data)
@@ -112,15 +99,17 @@ class Reminder(commands.Cog):
     @reminder.error
     async def reminder_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
-            await send_embed(ctx, 'Provide a reminder', 'You need *something* for me to remind you about.\n'
-                                                        f'Use `{await get_server_prefix(self.bot, ctx)}remind <time> <reminder>`.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Provide a reminder',
+                                                      'You need *something* for me to remind you about.\n'
+                                                      f'Use `{await get_server_prefix(self.bot, ctx)}remind <time> <reminder>`.',
+                                                      color=discord.Color.red()))
         else:
-            await send_embed(ctx, 'Provide a valid time', 'You need to specify a valid time.\n'
-                                                          f'Use `{await get_server_prefix(self.bot, ctx)}remind <time> <reminder>`'
-                                                          f' where `<time>` is a time like `11:59p`, `9:00am`, `4:44pm`, `23:29` or in relative format like'
-                                                          f' `4h40s` or `1d30m10s`.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Provide a valid time',
+                                                      'You need to specify a valid time.\n'
+                                                      f'Use `{await get_server_prefix(self.bot, ctx)}remind <time> <reminder>`'
+                                                      f' where `<time>` is a time like `11:59p`, `9:00am`, `4:44pm`, `23:29` or in relative format like'
+                                                      f' `4h40s` or `1d30m10s`.',
+                                                      color=discord.Color.red()))
 
     @tasks.loop(seconds=5.0)
     async def reminder_loop(self):
@@ -133,11 +122,9 @@ class Reminder(commands.Cog):
                 author = await self.bot.fetch_user(user_id)
                 channel = await self.bot.fetch_channel(channel_id)
                 message = await channel.fetch_message(message_id)
-                embed = await send_embed(channel, 'Reminder',
-                                         f'<@!{author.id}>, **{time_string}** ago you asked to be reminded about **{reminder}**. '
-                                         f'\n[Jump to reminder]({message.jump_url})', avatar_url=author.avatar_url,
-                                         send=False)
-                await author.send(embed=embed)
+                await author.send(embed=await generate_embed(author, 'Reminder',
+                                                             f'<@!{author.id}>, **{time_string}** ago you asked to be reminded about **{reminder}**. '
+                                                             f'\n[Jump to reminder]({message.jump_url})'))
                 await message.add_reaction('<:check:867760636980756500>')
 
                 data.pop(t)

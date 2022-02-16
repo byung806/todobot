@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands
 
 from data.config import PREFIX, TOKEN
+from util.generate_embed import generate_embed
 from util.get_server_prefix import get_server_prefix
-from util.send_embed import send_embed
 
 
 def mixed_case(*args):
@@ -15,6 +15,7 @@ def mixed_case(*args):
         a = map(''.join, itertools.product(*((c.upper(), c.lower()) for c in string)))
         for x in list(a): total.append(x)
     return list(total)
+
 
 bot = commands.Bot(command_prefix=get_server_prefix, case_insensitive=True)
 bot.remove_command('help')
@@ -55,8 +56,9 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if f'<@!{bot.user.id}>' in message.content:
-        await send_embed(message, 'Hey! I\'m Todo-bot.', f'Run `{await get_server_prefix(message, message.guild.id)}'
-                                                         f' help` to see my commands.', bot.user.avatar_url)
+        await message.channel.send(embed=await generate_embed(message.author, 'Hey! I\'m Todo-bot.',
+                                                              f'Run `{await get_server_prefix(message, message.guild.id)}'
+                                                              f' help` to see my commands.', bot.user.avatar_url))
     await bot.process_commands(message)
 
 

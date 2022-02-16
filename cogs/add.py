@@ -7,8 +7,8 @@ import json
 import discord
 from discord.ext import commands
 
+from util.generate_embed import generate_embed
 from util.get_server_prefix import get_server_prefix
-from util.send_embed import send_embed
 
 
 class Add(commands.Cog):
@@ -21,13 +21,14 @@ class Add(commands.Cog):
 
         priority = ''
         while not priority.isdigit():
-            await send_embed(ctx, 'Choose priority',
-                             f'Choose the priority of **{task}** from 1-10. Type `cancel` to cancel or `default`'
-                             f' to choose the default priority (last).')
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Choose priority',
+                                                      f'Choose the priority of **{task}** from 1-10. Type `cancel` to cancel or `default`'
+                                                      f' to choose the default priority (last).'))
             priority = (await self.bot.wait_for('message', check=lambda msg: msg.author == ctx.author)).content
             if priority == 'cancel':
-                await send_embed(ctx, 'Add command cancelled', f'Add something to your todo-list with '
-                                                               f'{get_server_prefix(self.bot, ctx)}add <task>')
+                await ctx.send(embed=await generate_embed(ctx.message.author, 'Add command cancelled',
+                                                          f'Add something to your todo-list with '
+                                                          f'{get_server_prefix(self.bot, ctx)}add <task>'))
                 return
             elif priority == 'default':
                 priority = 1
@@ -51,16 +52,18 @@ class Add(commands.Cog):
         f = open('data\\tasks.json', 'w')
         f.write(json_data)
         f.close()
-        await send_embed(ctx, 'Task added', f'Added **{added}** with priority **{priority}**.',
-                         color=discord.Color.green())
+        await ctx.send(embed=await generate_embed(ctx.message.author, 'Task added',
+                                                  f'Added **{added}** with priority **{priority}**.',
+                                                  color=discord.Color.green()))
 
     @add.error
     async def add_error(self, ctx, error):
         if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
-            await send_embed(ctx, 'Provide a task name', 'You need *something* to put on your todo-list.\n'
-                                                         f'Use `{await get_server_prefix(self.bot, ctx)}'
-                                                         f'add <task>` to add a task.',
-                             color=discord.Color.red())
+            await ctx.send(embed=await generate_embed(ctx.message.author, 'Provide a task name',
+                                                      'You need *something* to put on your todo-list.\n'
+                                                      f'Use `{await get_server_prefix(self.bot, ctx)}'
+                                                      f'add <task>` to add a task.',
+                                                      color=discord.Color.red()))
         else:
             raise error
 

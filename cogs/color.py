@@ -3,8 +3,8 @@ import re
 
 from discord.ext import commands
 
+from util.generate_embed import generate_embed
 from util.get_embed_color import get_embed_color
-from util.send_embed import send_embed
 
 
 class Color(commands.Cog):
@@ -16,27 +16,36 @@ class Color(commands.Cog):
         data = json.load(open('data\\colors.json', 'r'))
         if not color:
             color = get_embed_color(ctx.message.author.id, True)
-            description = f'Your color is {color}.'
+            description = f'Your color is **{color}**.'
         else:
+            preset_colors = json.load(open('data\\preset_colors.json', 'r'))
+            if color in preset_colors:
+                color = preset_colors[color]
             regex = "^#*([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
             p = re.compile(regex)
-            if re.search(p, color):
-                if len(color) == 4:
-                    color = '#' + ''.join(map(lambda x: x + x, color[1:].split('')))
-                data[str(ctx.message.author.id)] = color
+            if re.search(p, color) or color == 'random':
+                if color != 'random':
+                    color = color.replace('#', '')
+                    if (len(color) == 3):
+                        color *= 2
+                    data[str(ctx.message.author.id)] = int(color, 16)
+                else:
+                    data[str(ctx.message.author.id)] = color
                 json_data = json.dumps(data)
                 f = open('data\\colors.json', 'w')
                 f.write(json_data)
                 f.close()
-                description = f'Set your color to {color}.'
+                description = f'Set your color to **#{color.upper()}**.'
             else:
                 raise Exception
 
-        await send_embed(ctx, f'{ctx.message.author.name}\'s color', description)
+        await ctx.send(
+            embed=await generate_embed(ctx.message.author, f'{ctx.message.author.name}\'s color', description))
 
     @color.error
     async def color_error(self, ctx, error):
-        await send_embed(ctx, 'Invalid color', 'Enter a valid hex value (ex: #FFF or #121B24)')
+        await ctx.send(embed=await generate_embed(ctx.message.author, 'Invalid color',
+                                                  'Enter a valid hex value (ex: #FFF or #121B24)'))
 
 
 def setup(bot):

@@ -3,7 +3,7 @@ import json
 import discord
 from discord.ext import commands
 
-from util.send_embed import send_embed
+from util.generate_embed import generate_embed
 
 
 class Sort(commands.Cog):
@@ -38,7 +38,9 @@ class Sort(commands.Cog):
         f = open('data\\tasks.json', 'w')
         f.write(json_data)
         f.close()
-        await send_embed(ctx, 'Sort complete', f'Sorted your todo-list by **{type}**.', color=discord.Color.green())
+        await ctx.send(
+            embed=await generate_embed(ctx.message.author, 'Sort complete', f'Sorted your todo-list by **{type}**.',
+                                       color=discord.Color.green()))
 
 
 def setup(bot):
