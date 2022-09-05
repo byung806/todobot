@@ -1,4 +1,4 @@
-# Todo-bot
+# Todobot
 ### by byung806
 
 The Discord bot to put an end to your procrastination!
